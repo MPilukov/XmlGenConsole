@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
@@ -145,7 +146,7 @@ namespace XmlGenConsole
                 
                 var formatter = new XmlSerializer(typeof(WebResource));
  
-                using (var fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                using (var fs = new StreamWriter(fileName, false, new UTF8Encoding()))
                 {
                     formatter.Serialize(fs, webResource, xns);
                 }
