@@ -75,7 +75,7 @@ namespace XmlGenConsole
                 {
                     Directory.CreateDirectory("logs");
                 }
-                File.WriteAllText($"logs/{logsFileName}.txt", s);
+                File.AppendAllText($"logs/{logsFileName}.txt", s);
             });
 
             return trace;
