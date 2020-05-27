@@ -46,9 +46,10 @@ namespace XmlGenConsole
             }
             
             var dirFile = fullDirName.Replace(fullSolutionDir, "")
-                .Replace("Web Resources\\Root\\", "");
-            var filePath = $"{dirFile}\\{fileName}";
-            
+                .Replace("Web Resources\\Root\\", "")
+                .Replace("Web Resources\\Root", "");
+            var filePath = string.IsNullOrWhiteSpace(dirFile) ? fileName : $"{dirFile}\\{fileName}";
+
             var webResInCrmSolFolder = fullSolutionDir.Replace("Web Resources", "CrmSolutions\\WebResources");
             var filePathInCrmSolFolder = $"{webResInCrmSolFolder}\\WebResources\\{filePath}.data.xml";
 
