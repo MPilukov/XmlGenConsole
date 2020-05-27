@@ -120,7 +120,7 @@ namespace XmlGenConsole
             }
 
             var id = resource.WebResourceId;
-            resource.FileName = $"/WebResources/{resource.Name.Replace("/", "").Replace(".", "")}{id}";
+            resource.FileName = $"/WebResources/{resource.Name.Replace("/", "").Replace(".", "")}{id.ToUpper()}";
             resource.WebResourceId = $"{{{id}}}";
             
             CreateXml(filePathInCrmSolFolder, resource, trace);
