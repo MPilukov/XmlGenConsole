@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Newtonsoft.Json;
 
 namespace XmlGenConsole
@@ -22,20 +23,20 @@ namespace XmlGenConsole
 
         public static async Task Main(string[] args)
         {
-            // if (args.Length < 4)
-            // {
-            //     return;
-            // }
-            //
-            // var fileExt = args[0];
-            // var fileName = args[1];
-            // var fullDirName = args[2];
-            // var fullSolutionDir = args[3];
+            if (args.Length < 4)
+            {
+                return;
+            }
+            
+            var fileExt = args[0];
+            var fileName = args[1];
+            var fullDirName = args[2];
+            var fullSolutionDir = args[3];
 
-            var fileExt = "js";
-            var fileName = "logic.js";
-            var fullDirName = "C:\\Repos\\ModulBank-CRM\\Web Resources\\Web Resources\\Root\\dfs_\\BankGuarantee\\ShopWindow";
-            var fullSolutionDir ="C:\\Repos\\ModulBank-CRM\\Web Resources\\";
+            // var fileExt = "js";
+            // var fileName = "logic.js";
+            // var fullDirName = "C:\\Repos\\ModulBank-CRM\\Web Resources\\Web Resources\\Root\\dfs_\\BankGuarantee\\ShopWindow";
+            // var fullSolutionDir ="C:\\Repos\\ModulBank-CRM\\Web Resources\\";
 
             if (!fullSolutionDir.EndsWith("ModulBank-CRM\\Web Resources\\",
                 StringComparison.InvariantCultureIgnoreCase))
@@ -54,8 +55,15 @@ namespace XmlGenConsole
             
             var webResInCrmSolFolder = fullSolutionDir.Replace("Web Resources", "CrmSolutions\\WebResources");
             var filePathInCrmSolFolder = $"{webResInCrmSolFolder}\\WebResources\\{filePath}.data.xml";
+
+            var trace = GetTracer(filePath);
             
-            var logsFileName = $"{filePath}"
+            await CreateFileIfNotFound(dirFile, filePath, webResInCrmSolFolder, filePathInCrmSolFolder, trace);
+        }
+
+        private static Action<string> GetTracer(string fileName)
+        {
+            var logsFileName = $"{fileName}"
                 .Replace("\\", "")
                 .Replace(":", "")
                 .Replace(".", "");
@@ -70,7 +78,7 @@ namespace XmlGenConsole
                 File.WriteAllText($"logs/{logsFileName}.txt", s);
             });
 
-            await CreateFileIfNotFound(dirFile, filePath, webResInCrmSolFolder, filePathInCrmSolFolder, trace);
+            return trace;
         }
         
         private static async Task CreateFileIfNotFound(string dirFile, string filePath, 
@@ -95,21 +103,46 @@ namespace XmlGenConsole
                 trace("Не удалось подключиться к CRM.");
                 return;
             }
+
+            WebResource resource;
             
             if (isExistInCrm.Value)
             {
-                var resource = await GetWebResource(filePath, trace);
+                resource = await GetWebResource(filePath, trace);
                 if (resource == null)
                 {
                     trace($"Не удалось получить файл из CRM {filePath}.");
                     return;
                 }
+
                 // файл есть в црм, но нет в репе. добавим ?
-                return;
             }
             else
             {
+                resource = new WebResource
+                {
+                    
+                };
                 // файла нет в црм и нет в репе
+            }
+            
+            CreateXml(filePathInCrmSolFolder, resource, trace);
+        }
+        
+        private static void CreateXml(string fileName, WebResource webResource, Action<string> trace)
+        {
+            try
+            {
+                var formatter = new XmlSerializer(typeof(WebResource));
+ 
+                using (var fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                {
+                    formatter.Serialize(fs, webResource);
+                }
+            }
+            catch (Exception e)
+            {
+                trace($"CreateXml error : {e}");
             }
         }
 
@@ -217,11 +250,11 @@ namespace XmlGenConsole
                                     DisplayName = first.DisplayName,
                                     DependencyXml = first.DependencyXml,
                                     IntroducedVersion = first.IntroducedVersion,
-                                    IsCustomizable = first.IsCustomizable.Value,
-                                    IsHidden = first.IsHidden.Value,
-                                    CanBeDeleted = first.CanBeDeleted.Value,
-                                    IsAvailableForMobileOffline = first.IsAvailableForMobileOffline,
-                                    IsEnabledForMobileClient = first.IsEnabledForMobileClient,
+                                    IsCustomizable = first.IsCustomizable.Value ? (byte)1 : (byte)0,
+                                    IsHidden = first.IsHidden.Value ? (byte)1 : (byte)0,
+                                    CanBeDeleted = first.CanBeDeleted.Value ? (byte)1 : (byte)0,
+                                    IsAvailableForMobileOffline = first.IsAvailableForMobileOffline ? (byte)1 : (byte)0,
+                                    IsEnabledForMobileClient = first.IsEnabledForMobileClient ? (byte)1 : (byte)0,
                                 };
                             }
                             
