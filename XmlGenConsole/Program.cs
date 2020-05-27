@@ -192,7 +192,6 @@ namespace XmlGenConsole
                     var uri = new Uri(baseUri, url + "WebResources/" + filePath);
                     
                     var response = await client.GetAsync(uri);
-                    Console.WriteLine($"Response StatusCode: {(int)response.StatusCode}");
 
                     switch (response.StatusCode)
                     {
