@@ -75,7 +75,7 @@ namespace XmlGenConsole
                 {
                     Directory.CreateDirectory("logs");
                 }
-                File.AppendAllText($"logs/{logsFileName}.txt", s);
+                File.AppendAllText($"logs/{logsFileName}.txt", s + Environment.NewLine);
             });
 
             return trace;
@@ -114,8 +114,6 @@ namespace XmlGenConsole
                     trace($"Не удалось получить файл из CRM {filePath}.");
                     return;
                 }
-
-                // файл есть в црм, но нет в репе. добавим ?
             }
             else
             {
@@ -123,7 +121,6 @@ namespace XmlGenConsole
                 {
                     
                 };
-                // файла нет в црм и нет в репе
             }
             
             CreateXml(filePathInCrmSolFolder, resource, trace);
