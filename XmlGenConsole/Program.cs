@@ -31,10 +31,16 @@ namespace XmlGenConsole
             
             var fileExt = args[0];
             var fileName = args[1];
-            var fullDirName = args[2];
-            var fullSolutionDir = args[3];
+            var fullDirName = args[2]?.Replace("\\", "/");
+            var fullSolutionDir = args[3]?.Replace("\\", "/");
 
-            if (!fullSolutionDir.EndsWith("ModulBank-CRM\\Web Resources\\",
+            if (string.IsNullOrWhiteSpace(fileExt) || string.IsNullOrWhiteSpace(fileName) ||
+                string.IsNullOrWhiteSpace(fullDirName) || string.IsNullOrWhiteSpace(fullSolutionDir))
+            {
+                return;
+            }
+
+            if (!fullSolutionDir.EndsWith("ModulBank-CRM/Web Resources/",
                 StringComparison.InvariantCultureIgnoreCase))
             {
                 return;
@@ -46,22 +52,22 @@ namespace XmlGenConsole
             }
             
             var dirFile = fullDirName.Replace(fullSolutionDir, "")
-                .Replace("Web Resources\\Root\\", "")
-                .Replace("Web Resources\\Root", "");
-            var filePath = string.IsNullOrWhiteSpace(dirFile) ? fileName : $"{dirFile}\\{fileName}";
+                .Replace("Web Resources/Root/", "")
+                .Replace("Web Resources/Root", "");
+            var filePath = string.IsNullOrWhiteSpace(dirFile) ? fileName : $"{dirFile}/{fileName}";
 
-            var webResInCrmSolFolder = fullSolutionDir.Replace("Web Resources", "CrmSolutions\\WebResources");
-            var filePathInCrmSolFolder = $"{webResInCrmSolFolder}\\WebResources\\{filePath}.data.xml";
+            var webResInCrmSolFolder = fullSolutionDir.Replace("Web Resources", "CrmSolutions/WebResources");
+            var filePathInCrmSolFolder = $"{webResInCrmSolFolder}/WebResources/{filePath}.data.xml";
 
             var trace = GetTracer(filePath);
             
-            await CreateFileIfNotFound(dirFile, filePath, webResInCrmSolFolder, filePathInCrmSolFolder, trace);
+            await CreateFileIfNotFound(filePath, filePathInCrmSolFolder, webResourceType, trace);
         }
 
         private static Action<string> GetTracer(string fileName)
         {
             var logsFileName = $"{fileName}"
-                .Replace("\\", "")
+                .Replace("/", "")
                 .Replace(":", "")
                 .Replace(".", "");
             
@@ -78,8 +84,7 @@ namespace XmlGenConsole
             return trace;
         }
         
-        private static async Task CreateFileIfNotFound(string dirFile, string filePath, 
-            string webResInCrmSolFolder, string filePathInCrmSolFolder, Action<string> trace)
+        private static async Task CreateFileIfNotFound(string filePath, string filePathInCrmSolFolder, string webResourceType, Action<string> trace)
         {
             var isExistInRepo = IsExist(filePathInCrmSolFolder, trace);
             if (isExistInRepo == null)
@@ -118,9 +123,22 @@ namespace XmlGenConsole
             }
             else
             {
+                var id = Guid.NewGuid();
+                var strId = id.ToString();
+                var name = filePath;
+                
                 resource = new WebResource
                 {
-                    
+                    WebResourceId = $"{{{strId}}}",
+                    Name = name,
+                    FileName = $"/WebResources/{name.Replace("/", "").Replace(".", "")}{strId.ToUpper()}",
+                    WebResourceType = webResourceType,
+                    IntroducedVersion = "1.0",
+                    IsEnabledForMobileClient = 0,
+                    IsAvailableForMobileOffline = 0,
+                    IsCustomizable = 1,
+                    CanBeDeleted = 1,
+                    IsHidden = 0,
                 };
             }
 
@@ -236,7 +254,7 @@ namespace XmlGenConsole
                         "$select=canbedeleted,componentstate,createdon,dependencyxml,description,displayname," +
                         "introducedversion,isavailableformobileoffline,iscustomizable,isenabledformobileclient," +
                         "ishidden,ismanaged,name,webresourceid,webresourcetype" +
-                        "&$filter=name eq '" + filePath.Replace("\\", "/") + "'");
+                        "&$filter=name eq '" + filePath + "'");
                     
                     var response = await client.GetAsync(uri);
 
