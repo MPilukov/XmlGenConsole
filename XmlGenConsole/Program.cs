@@ -110,6 +110,10 @@ namespace XmlGenConsole
                     trace($"Не удалось получить файл из CRM {filePath}.");
                     return;
                 }
+                
+                var id = resource.WebResourceId;
+                resource.FileName = $"/WebResources/{resource.Name.Replace("/", "").Replace(".", "")}{id.ToUpper()}";
+                resource.WebResourceId = $"{{{id}}}";
             }
             else
             {
@@ -119,10 +123,6 @@ namespace XmlGenConsole
                 };
             }
 
-            var id = resource.WebResourceId;
-            resource.FileName = $"/WebResources/{resource.Name.Replace("/", "").Replace(".", "")}{id.ToUpper()}";
-            resource.WebResourceId = $"{{{id}}}";
-            
             CreateXml(filePathInCrmSolFolder, resource, trace);
         }
         
