@@ -133,6 +133,17 @@ namespace XmlGenConsole
         {
             try
             {
+                var dir = Path.GetDirectoryName(fileName);
+                if (string.IsNullOrWhiteSpace(dir))
+                {
+                    trace($"Не указана папка для файла : {fileName}");
+                    return;
+                }
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+                
                 var formatter = new XmlSerializer(typeof(WebResource));
  
                 using (var fs = new FileStream(fileName, FileMode.OpenOrCreate))
@@ -145,7 +156,6 @@ namespace XmlGenConsole
                 trace($"CreateXml error : {e}");
             }
         }
-
         private static bool? IsExist(string filePath, Action<string> trace)
         {
             try
