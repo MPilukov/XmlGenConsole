@@ -33,11 +33,6 @@ namespace XmlGenConsole
             var fullDirName = args[2];
             var fullSolutionDir = args[3];
 
-            // var fileExt = "js";
-            // var fileName = "logic.js";
-            // var fullDirName = "C:\\Repos\\ModulBank-CRM\\Web Resources\\Web Resources\\Root\\dfs_\\BankGuarantee\\ShopWindow";
-            // var fullSolutionDir ="C:\\Repos\\ModulBank-CRM\\Web Resources\\";
-
             if (!fullSolutionDir.EndsWith("ModulBank-CRM\\Web Resources\\",
                 StringComparison.InvariantCultureIgnoreCase))
             {
@@ -122,6 +117,10 @@ namespace XmlGenConsole
                     
                 };
             }
+
+            var id = resource.WebResourceId;
+            resource.FileName = $"/WebResources/{resource.Name.Replace("/", "").Replace(".", "")}{id}";
+            resource.WebResourceId = $"{{{id}}}";
             
             CreateXml(filePathInCrmSolFolder, resource, trace);
         }
@@ -141,11 +140,14 @@ namespace XmlGenConsole
                     Directory.CreateDirectory(dir);
                 }
                 
+                var xns = new XmlSerializerNamespaces();
+                xns.Add(string.Empty, string.Empty);
+                
                 var formatter = new XmlSerializer(typeof(WebResource));
  
                 using (var fs = new FileStream(fileName, FileMode.OpenOrCreate))
                 {
-                    formatter.Serialize(fs, webResource);
+                    formatter.Serialize(fs, webResource, xns);
                 }
             }
             catch (Exception e)

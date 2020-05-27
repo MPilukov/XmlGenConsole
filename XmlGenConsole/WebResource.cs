@@ -14,9 +14,9 @@ namespace XmlGenConsole
         public string IntroducedVersion { get; set; }
         public byte IsEnabledForMobileClient { get; set; }
         public byte IsAvailableForMobileOffline { get; set; }
-
+        public byte IsCustomizable { get; set; }
         public byte CanBeDeleted { get; set; }
         public byte IsHidden { get; set; }
-        public byte IsCustomizable { get; set; }
+        public string FileName { get; set; }
     }
 }
