@@ -172,8 +172,6 @@ namespace XmlGenConsole
         {
             try
             {
-                Console.WriteLine($"Check exist file: {filePath}");
-                
                 var url = ConfigurationManager.AppSettings.Get("crm.baseUrl");
                 var userName = ConfigurationManager.AppSettings.Get("crm.userName");
                 var password = ConfigurationManager.AppSettings.Get("crm.password");
