@@ -61,7 +61,7 @@ namespace XmlGenConsole
 
             var trace = GetTracer(filePath);
             
-            await CreateFileIfNotFound(filePath, filePathInCrmSolFolder, webResourceType, trace);
+            await CreateFileIfNotFound(filePath, webResInCrmSolFolder, filePathInCrmSolFolder, webResourceType, trace);
         }
 
         private static Action<string> GetTracer(string fileName)
@@ -84,7 +84,8 @@ namespace XmlGenConsole
             return trace;
         }
         
-        private static async Task CreateFileIfNotFound(string filePath, string filePathInCrmSolFolder, string webResourceType, Action<string> trace)
+        private static async Task CreateFileIfNotFound(string filePath, string webResInCrmSolFolder, 
+            string filePathInCrmSolFolder, string webResourceType, Action<string> trace)
         {
             var isExistInRepo = IsExist(filePathInCrmSolFolder, trace);
             if (isExistInRepo == null)
@@ -143,6 +144,29 @@ namespace XmlGenConsole
             }
 
             CreateXml(filePathInCrmSolFolder, resource, trace);
+            AddToSolution($"{webResInCrmSolFolder}/Other/Solution.xml", filePath, trace);
+        }
+
+        private static void AddToSolution(string solutionFile, string resourceFileName, Action<string> trace)
+        {
+            try
+            {
+                if (!File.Exists(solutionFile))
+                {
+                    return;
+                }
+
+                var data = File.ReadAllText(solutionFile);
+                var newData = data.Replace(@"
+    </RootComponents>", $@"
+      <RootComponent type=""61"" schemaName=""{resourceFileName}"" behavior=""0"" />
+    </RootComponents>");
+                File.WriteAllText(solutionFile, newData);
+            }
+            catch (Exception e)
+            {
+                trace($"AddToSolution error : {e}");
+            }
         }
         
         private static void CreateXml(string fileName, WebResource webResource, Action<string> trace)
